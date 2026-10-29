@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="format-detection" content="telephone=no">
+<title>你更适合芯片制造，还是芯片测试</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html,body { height:100%; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB",
+               "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+  background:#F7FBF8; color:#04342C; overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+.screen { display:none; min-height:100%; flex-direction:column; }
+.screen.on { display:flex; }
+
+/* ---------- 开始页 ---------- */
+#screen-start { align-items:center; justify-content:center; padding:36px 24px 40px; text-align:center; }
+.start-wrap { width:100%; max-width:420px; }
+.start-badge {
+  display:inline-block; background:#D8EDE1; color:#0F6E56; font-size:13px; font-weight:700;
+  padding:6px 14px; border-radius:20px; margin-bottom:18px; letter-spacing:.5px;
+}
+.start-title { font-size:30px; font-weight:800; line-height:1.32; color:#04342C; }
+.start-sub { font-size:14px; color:#5A6B63; margin-top:12px; line-height:1.7; }
+.start-meta { display:flex; justify-content:center; gap:8px; margin:22px 0 26px; flex-wrap:wrap; }
+.meta-pill {
+  background:#fff; border:1px solid #D8EDE1; color:#0F6E56; font-size:12.5px;
+  font-weight:600; padding:6px 13px; border-radius:16px;
+}
+.start-btn {
+  width:100%; background:#0F6E56; color:#fff; border:none; border-radius:12px;
+  padding:16px; font-size:17px; font-weight:700; cursor:pointer;
+  box-shadow:0 6px 18px rgba(15,110,86,.24); transition:transform .12s, opacity .12s;
+}
+.start-btn:active { transform:scale(.985); opacity:.92; }
+.start-note { font-size:12px; color:#8A9A91; margin-top:16px; line-height:1.7; }
+.start-logo { margin-top:26px; font-size:11.5px; color:#A8B6AE; letter-spacing:.4px; }
+
+/* ---------- 答题页 ---------- */
+#screen-quiz { padding:0; }
+.quiz-top {
+  position:sticky; top:0; z-index:10; background:#F7FBF8; padding:16px 20px 12px;
+  border-bottom:1px solid #EAF3EE;
+}
+.quiz-top-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+.back-btn {
+  width:34px; height:34px; border-radius:9px; border:1px solid #D8EDE1; background:#fff;
+  color:#0F6E56; font-size:17px; align-items:center; justify-content:center; cursor:pointer;
+  display:none; font-weight:700; flex:none;
+}
+.back-btn.on { display:flex; }
+.q-counter { font-size:13px; color:#5A6B63; font-weight:600; }
+.q-counter b { color:#0F6E56; font-size:19px; font-weight:800; }
+.prog-track { height:4px; background:#E3EFE9; border-radius:3px; overflow:hidden; }
+.prog-fill { height:100%; background:#0F6E56; width:0; transition:width .3s ease; }
+
+.quiz-body { flex:1; padding:26px 20px 40px; max-width:520px; margin:0 auto; width:100%; }
+.q-text {
+  font-size:19px; font-weight:700; line-height:1.6; color:#04342C; margin-bottom:22px;
+  animation:fadeUp .3s ease;
+}
+@keyframes fadeUp { from{opacity:0;transform:translateY(8px);} to{opacity:1;transform:none;} }
+.opt {
+  display:flex; align-items:flex-start; gap:12px; width:100%; text-align:left;
+  background:#fff; border:1.5px solid #E3EFE9; border-radius:13px; padding:15px 16px;
+  margin-bottom:11px; cursor:pointer; font-size:15px; line-height:1.55; color:#2F4A41;
+  transition:border-color .15s, background .15s, transform .1s;
+  animation:fadeUp .3s ease backwards;
+}
+.opt:nth-child(1){animation-delay:.04s} .opt:nth-child(2){animation-delay:.08s}
+.opt:nth-child(3){animation-delay:.12s} .opt:nth-child(4){animation-delay:.16s}
+.opt:active { transform:scale(.99); }
+.opt.chosen { border-color:#0F6E56; background:#EFF7F2; color:#04342C; }
+.opt-key {
+  flex:none; width:25px; height:25px; border-radius:8px; background:#D8EDE1; color:#0F6E56;
+  font-size:13px; font-weight:800; display:flex; align-items:center; justify-content:center;
+  transition:background .15s, color .15s;
+}
+.opt.chosen .opt-key { background:#0F6E56; color:#fff; }
+.opt-text { padding-top:2px; }
+
+/* ---------- 结果页 ---------- */
+#screen-quiz.done { display:none; }
+.result-hero {
+  background:#04342C; color:#fff; padding:34px 22px 30px; text-align:center;
+}
+.r-tag {
+  display:inline-block; color:#fff; font-size:13px; font-weight:700; padding:6px 16px;
+  border-radius:18px; margin-bottom:12px;
+}
+.r-label { font-size:27px; font-weight:800; margin-bottom:6px; }
+.r-hero-sub { font-size:13px; color:#9FBCAF; margin-top:8px; }
+
+.result-body { padding:22px 20px 40px; max-width:520px; margin:0 auto; width:100%; }
+.card {
+  background:#fff; border:1px solid #E3EFE9; border-radius:13px; padding:17px 18px; margin-bottom:12px;
+}
+.card-label { font-size:11.5px; font-weight:700; color:#0F6E56; letter-spacing:1px; margin-bottom:9px; }
+.card-text { font-size:14.5px; line-height:1.78; color:#2F4A41; }
+.jobs-list { font-size:14.5px; line-height:1.8; color:#0F6E56; font-weight:700; }
+.warn-card { background:#FDF4EF; border-color:#F2D6C8; }
+.warn-card .card-label { color:#C4622F; }
+.warn-card .card-text { color:#8A4A26; }
+
+.score-card { background:#fff; border:1px solid #E3EFE9; border-radius:13px; padding:16px 18px; margin-bottom:12px; }
+.score-row { display:flex; align-items:center; gap:11px; margin-bottom:9px; }
+.score-row:last-child { margin-bottom:0; }
+.score-name { font-size:13px; font-weight:700; width:44px; flex:none; }
+.score-track { flex:1; height:8px; background:#EDF4F0; border-radius:4px; overflow:hidden; }
+.score-fill { height:100%; border-radius:4px; transition:width .6s ease; }
+.score-fill.m { background:#0F6E56; }
+.score-fill.t { background:#D85A30; }
+.score-num { font-size:13px; font-weight:800; width:26px; text-align:right; flex:none; }
+.score-note { font-size:11.5px; color:#8A9A91; margin-top:11px; padding-top:11px; border-top:1px dashed #E3EFE9; line-height:1.65; }
+
+.cta-card { background:#D8EDE1; border:none; border-radius:13px; padding:18px; text-align:center; margin-bottom:12px; }
+.cta-text { font-size:14.5px; font-weight:700; color:#04342C; margin-bottom:14px; }
+.qr-box {
+  width:158px; height:158px; margin:0 auto 10px; background:#fff; border-radius:11px;
+  display:flex; align-items:center; justify-content:center; overflow:hidden;
+}
+.qr-box img { width:100%; height:100%; object-fit:contain; }
+.qr-ph {
+  width:100%; height:100%; border:1.5px dashed #9FBCAF; border-radius:10px; color:#7C9A8B;
+  font-size:12px; display:flex; align-items:center; justify-content:center;
+}
+.qr-text { font-size:13px; color:#2F4A41; font-weight:600; }
+.qr-sub { font-size:11.5px; color:#5A6B63; margin-top:5px; }
+
+.btn-row { display:flex; gap:10px; margin-top:14px; }
+.btn {
+  flex:1; border-radius:11px; padding:13px; font-size:14.5px; font-weight:700; cursor:pointer;
+  border:1.5px solid #0F6E56; background:#0F6E56; color:#fff; transition:transform .1s, opacity .1s;
+}
+.btn:active { transform:scale(.985); opacity:.92; }
+.btn.ghost { background:#fff; color:#0F6E56; }
+.result-foot { text-align:center; font-size:11.5px; color:#A8B6AE; margin-top:24px; line-height:1.8; }
+
+@media (max-width:360px) {
+  .start-title { font-size:26px; }
+  .r-label { font-size:23px; }
+  .q-text { font-size:17px; }
+  .opt { font-size:14px; padding:13px 14px; }
+}
+</style>
+</head>
+<body>
+
+<!-- 开始页 -->
+<div class="screen on" id="screen-start">
+  <div class="start-wrap">
+    <div class="start-badge">2 分钟 10 题</div>
+    <h1 class="start-title">你更适合芯片制造，<br>还是芯片测试</h1>
+    <p class="start-sub">两个岗位名字常被放在一起提<br>但性格要求差得挺远</p>
+    <div class="start-meta">
+      <span class="meta-pill">10 道题</span>
+      <span class="meta-pill">做完出结果</span>
+      <span class="meta-pill">5 档结果</span>
+    </div>
+    <button class="start-btn" id="start-btn">开始测试</button>
+    <p class="start-note">选完 10 题自动出结果<br>含岗位方向、能力建议与短板提醒</p>
+    <p class="start-logo">向日葵产学研 ｜ 上海临港产业大学集成电路二院</p>
+  </div>
+</div>
+
+<!-- 答题页 -->
+<div class="screen" id="screen-quiz">
+  <div class="quiz-top">
+    <div class="quiz-top-row">
+      <button class="back-btn" id="back-btn">‹</button>
+      <div class="q-counter"><b id="q-index">01</b><span id="q-total"> / 10</span></div>
+    </div>
+    <div class="prog-track"><div class="prog-fill" id="bar"></div></div>
+  </div>
+  <div class="quiz-body">
+    <div class="q-text" id="q-text"></div>
+    <div id="options"></div>
+  </div>
+</div>
+
+<!-- 结果页 -->
+<div class="screen" id="screen-result">
+  <div class="result-hero">
+    <div class="r-tag" id="r-tag"></div>
+    <div class="r-label" id="r-label"></div>
+    <div class="r-hero-sub">这是你的测试结果</div>
+  </div>
+  <div class="result-body">
+
+    <div class="card">
+      <div class="card-label">你的画像</div>
+      <div class="card-text" id="r-lead"></div>
+    </div>
+
+    <div class="score-card">
+      <div class="score-row">
+        <span class="score-name">制造</span>
+        <div class="score-track"><div class="score-fill m" id="bar-m"></div></div>
+        <span class="score-num" id="score-m">0</span>
+      </div>
+      <div class="score-row">
+        <span class="score-name">测试</span>
+        <div class="score-track"><div class="score-fill t" id="bar-t"></div></div>
+        <span class="score-num" id="score-t">0</span>
+      </div>
+      <div class="score-note">深度分 <b id="score-d">0</b> 分，达到 4 分及以上说明你愿意往原理和根因里钻，落在进阶档。</div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">对应岗位方向</div>
+      <div class="jobs-list" id="r-jobs"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">给零基础的你</div>
+      <div class="card-text" id="r-advice"></div>
+    </div>
+
+    <div class="card warn-card">
+      <div class="card-label">一句提醒</div>
+      <div class="card-text" id="r-warn"></div>
+    </div>
+
+    <div class="cta-card">
+      <div class="cta-text" id="r-cta"></div>
+      <div class="qr-box" id="qr-box"></div>
+      <div class="qr-text" id="qr-text"></div>
+      <div class="qr-sub"></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn ghost" id="restart-btn">重新测一次</button>
+      <button class="btn" id="share-btn">分享我的结果</button>
+    </div>
+
+    <p class="result-foot">结果只是参考，不是判决<br>十道题看的是倾向，真实适配还得靠上手试一次</p>
+  </div>
+</div>
+
+<script>
+/*
+ * 芯片测试职业倾向测评 H5
+ * 账号：向日葵产学研（上海临港产业大学集成电路二院）
+ *
+ * 【要改的三处】全在本文件顶部 CONFIG 区，搜 "CONFIG" 即可定位：
+ *   1. CONTACT_QR_IMAGE  报名二维码图片（可填 data:image/png;base64,... 或留空用文字按钮）
+ *   2. SHARE_URL         分享出去的落地链接
+ *   3. QUIZ              10 道题与选项、计分权重
+ */
+
+const CONFIG = {
+  TITLE: "你更适合芯片制造，还是芯片测试",
+  SUBTITLE: "2 分钟 10 题，测完出结果",
+  SHARE_URL: "https://famous-caramel-d6c227.netlify.app/",
+  CONTACT_QR_IMAGE: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPAAAADwAQAAAAAWLtQ/AAAD60lEQVR42u2ZTY7bRhCFv1YLoBcGmsssDFCAL5ADBNNCTuRFloFIOV4azo2CFnyAODdoLbNrBbPgAE2+LMiZ0Wjk8fxJGiTmhgJLRTZfva56VTTirmPCd/P/ycxAB0k4Ua1aasV8dXX0boZTCgAR5gdYWvlgbyspyhibVnbVU03wRcJKCgd/9tMwt5EiLlywClZ9oR6sZAMuXGF+BDpMAfoHeE+Hk1mX2tTt5hN8cMmUaa93OiioBmi7feauCkBL/ff0MM8uHx5vSbFOZGpJ+M/pjZGspJ14BxDxD95OXkjy6IwxM1UB976bfW4B2NAZY+Y3vQVh/Dl/DB3K595jlwd4m+q2UgL8ePGYTA23lpYxLWq9VcgYSQmcpIyXJmSApj1dsWi+CmqhpaREdiG7BnAhO4FNHDNx7TPnK97tJVM3O7swU7xd18VffREBuzZSV+nq5v1zLG0fmRLt5b9KA7Q02PsSuWVBpeRt8ji1VQM2eYXsdATMBy58QEDLHPovETgf6dAXsU5ew0tXA4AuZB5Ph/PrgN7pPf0GatVKalzInFk1khLv+AnyZYkN14XEAPDxviE5sDiQli0mkV2wybTVbwklbBizw+5xr/r9+p6YP8p7Kzv0hUzyVkGJIuKUXUheQ3bIe3PL6+cB9RYd2pugRtMCHhdsWlD1+OyG6nDqxHVn8hjoUC2Tx43FQsFKTk/RiudPWvkdEZtt3/zVumfdbefi6sLMO2PX88ODWj4pnzvjNHXLDDYtYFkCKGT8geM9GfRTAw1mn3Yo1BfRKOCGHq1OHlDYI2tOR+SrGUOzS+QeMkh9ERdOUshe6VRb8PxquZUUlVD0VKFQj/9dQcFugdoMumLogfnlpXQWESpJNnmgrfoiANLYvU93W6ZXO5rp8SV2j3e7O1gook3eKti4KOKgvp22493vvvf5CVPu6+tisaDqXbBSdssW8Epe+9rz8qjVYB9q8abq6UdRHuwo1cFnjljmZtdzgocReUHVO9mEUq0I3iak+3UW0ycprj9TD737Z3h2B/xgAj8PXEBSDwsXBvOOrji1VpTUu1BLuRL8Cu+oFHDN9tKacUNO4COzsUc/Zg9822yMMcYkunI13Swlm7CJkm1x0DyvbuE5VO7l2LGETd06Y0xP1ZUkGMTB9Na4bHagajC/LQ4iRawVrIKkdtxPYBVejjgwXzWrpCvP2EyK1TKtuirjL0z9VabaY85yb41jvtwwX9QZpq6B94xDsmOAWg4FPSPQ8Oo/diMz7tGuSXHhhAvAOIUODLOop49jvj1XNOu51rWkzRzedHNsYDPZc/MIb0fAdaL2fMwO5vvns/+W+V983mIJ+Z+2kgAAAABJRU5ErkJggg==",
+  CONTACT_TEXT: "扫码咨询课程与报名",
+  CONTACT_SUB: "芯片测试工程师 · 芯片制造工程师 持续招生中",
+};
+
+// ============ 题目与计分 ============
+// 每题选项：{ t: 选项文字, m: 制造分, t2: 测试分, d: 深度分 }
+// 分布已穷举校验：制造 47.9% / 测试 43.0% / 生态位 9.2%，五档均在 9%~38% 区间
+const QUIZ = [
+  { q: "一件东西有点不对劲，你的第一反应是", o: [
+    { t: "拆开看，坏在哪一环", m: 0, t2: 2, d: 1 },
+    { t: "回头查流程，看哪一步偏了", m: 2, t2: 0, d: 1 },
+    { t: "先记录下来，换件继续跑", m: 0, t2: 0, d: 0 },
+  ]},
+  { q: "让你选一个工位，你更想待在", o: [
+    { t: "设备机台前，一台台摸参数", m: 2, t2: 0, d: 0 },
+    { t: "屏幕前盯波形和数据", m: 0, t2: 2, d: 0 },
+    { t: "产线巡一圈，看整体节奏", m: 1, t2: 0, d: 0 },
+  ]},
+  { q: "更想要哪种工作节奏", o: [
+    { t: "流程清晰，按节点推进", m: 0, t2: 0, d: 0 },
+    { t: "每天都有新问题要解", m: 0, t2: 2, d: 1 },
+    { t: "长时间打磨一个系统", m: 2, t2: 0, d: 1 },
+  ]},
+  { q: "芯片出货前发现一颗不良，你在意的是", o: [
+    { t: "判定它到底坏在哪", m: 0, t2: 2, d: 1 },
+    { t: "让这类问题不再发生", m: 2, t2: 0, d: 1 },
+    { t: "两者都要", m: 1, t2: 1, d: 0 },
+  ]},
+  { q: "有人说「这个参数不对」，你会", o: [
+    { t: "直接改，跑一遍看结果", m: 0, t2: 2, d: 0 },
+    { t: "先把原理推一遍，确认改动有依据", m: 2, t2: 0, d: 0 },
+  ]},
+  { q: "你最怕遇到哪种情况", o: [
+    { t: "良率掉了，说不出为什么", m: 1, t2: 1, d: 1 },
+    { t: "设备参数漂了没人发现", m: 2, t2: 0, d: 0 },
+    { t: "产品流到客户端才发现有问题", m: 0, t2: 2, d: 0 },
+  ]},
+  { q: "面对一台不认识的机器，你更想知道", o: [
+    { t: "它内部怎么运作", m: 2, t2: 0, d: 1 },
+    { t: "怎么让它跑出我想要的结果", m: 0, t2: 2, d: 1 },
+  ]},
+  { q: "团队里你更愿意当哪种人", o: [
+    { t: "把流程优化到最稳的那个", m: 2, t2: 0, d: 0 },
+    { t: "出问题大家第一个想到的那个", m: 0, t2: 2, d: 0 },
+    { t: "能把原理讲清楚的那个", m: 1, t2: 1, d: 1 },
+  ]},
+  { q: "给你一个优化课题，你选哪个", o: [
+    { t: "提升良率，压生产节拍", m: 2, t2: 0, d: 0 },
+    { t: "提高测试覆盖率，减少漏测误判", m: 0, t2: 2, d: 0 },
+  ]},
+  { q: "哪个说法更让你认同", o: [
+    { t: "一颗芯片能稳定量产，才算真做成", m: 2, t2: 0, d: 1 },
+    { t: "一颗芯片能被准确判定，才算真做成", m: 0, t2: 2, d: 1 },
+    { t: "一套流程能被复现，才算真做成", m: 1, t2: 1, d: 0 },
+  ]},
+];
+
+// ============ 结果文案 ============
+const RESULTS = {
+  mf: { key: "mf", label: "制造 · 进阶型", tag: "工艺攻坚手", color: "#0F6E56",
+    lead: "你享受把问题拆到底的过程。工艺波动、设备异常、良率下滑，这些难题在你手里会变成可追的线索。",
+    jobs: "工艺整合 · 设备工程 · 良率提升",
+    advice: "这条路前期要啃原理，回报周期偏长，但天花板也高。",
+    warn: "耐不住重复性工作的人会很难受。",
+    cta: "推荐方向：芯片制造工程师班",
+  },
+  ms: { key: "ms", label: "制造 · 稳定型", tag: "产线守门人", color: "#1D9E75",
+    lead: "你更信流程的力量。把一套工艺稳稳跑出千万次，比偶尔创新一次更有价值。",
+    jobs: "量产工艺执行 · 晶圆厂制造 · 良率监控",
+    advice: "这是最容易进门的方向，制度化培养体系最完整。",
+    warn: "想快速看到技术跃升，这段路会显得慢。",
+    cta: "推荐方向：芯片制造工程师班",
+  },
+  tf: { key: "tf", label: "测试 · 进阶型", tag: "排障侦探", color: "#D85A30",
+    lead: "一颗芯片为什么不合格，你的兴趣比答案本身更大。数据、波形、失效分布，这些线索你愿意一条条追下去。",
+    jobs: "测试开发 · 失效分析 · 测试程序开发",
+    advice: "逻辑链强的优势在这里能直接兑现。",
+    warn: "要习惯长时间盯数据和复现问题。",
+    cta: "推荐方向：芯片测试工程师班",
+  },
+  ts: { key: "ts", label: "测试 · 稳定型", tag: "判定把关人", color: "#C4622F",
+    lead: "你更在意每一次判定都站得住。这份工作需要的严谨，恰好是很多岗位会训练出来的能力。",
+    jobs: "量产测试 · 测试技术员 · 质量管理",
+    advice: "入门路径清晰，需求稳定，行业缺口常年存在。",
+    warn: "这是两个方向里对零基础最友好的一个。",
+    cta: "推荐方向：芯片测试工程师班",
+  },
+  eco: { key: "eco", label: "生态位型", tag: "产业链连接者", color: "#0F6E56",
+    lead: "你的优势不在机台前，而在人和技术之间。理解技术，再把它讲给需要的人听，这本身是一门硬功夫。",
+    jobs: "FAE · 应用支持 · 售前工程师 · 项目管理",
+    advice: "这条线同样缺人，门槛不在学历。",
+    warn: "得补上半导体基础认知，这块课上有专门覆盖。",
+    cta: "这条线课上也覆盖，来聊聊具体岗位",
+  },
+};
+
+// ============ 状态 ============
+let cur = 0;
+let answers = new Array(QUIZ.length).fill(-1);
+let scores = { m: 0, t: 0, d: 0 };
+
+const $ = (s) => document.querySelector(s);
+const el = (id) => document.getElementById(id);
+
+function calcScores() {
+  scores = { m: 0, t: 0, d: 0 };
+  answers.forEach((ai, qi) => {
+    if (ai < 0) return;
+    const o = QUIZ[qi].o[ai];
+    scores.m += o.m; scores.t += o.t2; scores.d += o.d;
+  });
+}
+
+function pickResult() {
+  calcScores();
+  const diff = scores.m - scores.t;
+  const deep = scores.d >= 4;
+  if (Math.abs(diff) <= 0) return RESULTS.eco;
+  if (diff > 0) return deep ? RESULTS.mf : RESULTS.ms;
+  return deep ? RESULTS.tf : RESULTS.ts;
+}
+
+// ============ 渲染 ============
+function renderStart() {
+  el("screen-start").style.display = "flex";
+  el("screen-quiz").style.display = "none";
+  el("screen-result").style.display = "none";
+}
+
+function renderQuiz() {
+  el("screen-start").style.display = "none";
+  el("screen-result").style.display = "none";
+  el("screen-quiz").style.display = "flex";
+
+  const item = QUIZ[cur];
+  el("q-index").textContent = String(cur + 1).padStart(2, "0");
+  el("q-total").textContent = " / " + QUIZ.length;
+  el("q-text").textContent = item.q;
+
+  const wrap = el("options");
+  wrap.innerHTML = "";
+  item.o.forEach((o, i) => {
+    const b = document.createElement("button");
+    b.className = "opt" + (answers[cur] === i ? " chosen" : "");
+    b.innerHTML = '<span class="opt-key">' + "ABC".charAt(i) + '</span><span class="opt-text">' + o.t + '</span>';
+    b.onclick = () => choose(i);
+    wrap.appendChild(b);
+  });
+
+  const pct = Math.round((cur / QUIZ.length) * 100);
+  el("bar").style.width = pct + "%";
+  el("back-btn").style.display = cur === 0 ? "none" : "flex";
+}
+
+function choose(i) {
+  answers[cur] = i;
+  const nodes = el("options").children;
+  for (let k = 0; k < nodes.length; k++) nodes[k].classList.toggle("chosen", k === i);
+
+  const item = QUIZ[cur];
+  const gain = { m: item.o[i].m, t: item.o[i].t2, d: item.o[i].d };
+
+  setTimeout(() => {
+    if (cur < QUIZ.length - 1) {
+      cur++;
+      renderQuiz();
+    } else {
+      showResult();
+    }
+  }, 260);
+}
+
+function showResult() {
+  el("screen-quiz").style.display = "none";
+  el("screen-result").style.display = "flex";
+
+  const r = pickResult();
+  calcScores();
+
+  el("r-label").textContent = r.label;
+  el("r-tag").textContent = r.tag;
+  el("r-label").style.color = r.color;
+  el("r-tag").style.background = r.color;
+  el("r-lead").textContent = r.lead;
+  el("r-jobs").textContent = r.jobs;
+  el("r-advice").textContent = r.advice;
+  el("r-warn").textContent = r.warn;
+  el("r-cta").textContent = r.cta;
+
+  // 分数条
+  const maxS = Math.max(scores.m, scores.t, 1);
+  el("bar-m").style.width = Math.round(scores.m / maxS * 100) + "%";
+  el("bar-t").style.width = Math.round(scores.t / maxS * 100) + "%";
+  el("score-m").textContent = scores.m;
+  el("score-t").textContent = scores.t;
+  el("score-d").textContent = scores.d;
+
+  // 二维码
+  const qr = el("qr-box");
+  if (CONFIG.CONTACT_QR_IMAGE) {
+    qr.innerHTML = '<img src="' + CONFIG.CONTACT_QR_IMAGE + '" alt="报名二维码">';
+    el("qr-text").style.display = "none";
+  } else {
+    qr.innerHTML = '<div class="qr-ph">二维码位</div>';
+    el("qr-text").style.display = "block";
+  }
+
+  // 分享
+  const shareText = "我测出来了：" + r.label + "（" + r.tag + "），你测出来是哪个？";
+  el("share-btn").onclick = () => {
+    if (navigator.share) {
+      navigator.share({ title: CONFIG.TITLE, text: shareText, url: CONFIG.SHARE_URL || location.href })
+        .catch(() => {});
+    } else {
+      const txt = shareText + (CONFIG.SHARE_URL || location.href);
+      navigator.clipboard.writeText(txt).then(() => {
+        el("share-btn").textContent = "已复制，去分享吧";
+        setTimeout(() => (el("share-btn").textContent = "分享我的结果"), 1800);
+      }).catch(() => {
+        el("share-btn").textContent = shareText;
+      });
+    }
+  };
+
+  // 结果页标题
+  document.title = "你是" + r.tag + "｜" + CONFIG.TITLE;
+  window.scrollTo(0, 0);
+}
+
+function restart() {
+  cur = 0;
+  answers = new Array(QUIZ.length).fill(-1);
+  scores = { m: 0, t: 0, d: 0 };
+  renderStart();
+  window.scrollTo(0, 0);
+}
+
+function startQuiz() {
+  cur = 0;
+  answers = new Array(QUIZ.length).fill(-1);
+  renderQuiz();
+  window.scrollTo(0, 0);
+}
+
+el("start-btn").onclick = startQuiz;
+el("restart-btn").onclick = restart;
+el("back-btn").onclick = () => { if (cur > 0) { cur--; renderQuiz(); } };
+
+// 测试钩子：供自动化测试读写内部状态
+window.__quiz = {
+  get cur() { return cur; },
+  set cur(v) { cur = v; },
+  get answers() { return answers; },
+  set answers(v) { answers = v; },
+  get scores() { return scores; },
+  pickResult: pickResult,
+  calcScores: calcScores,
+  renderQuiz: renderQuiz,
+  showResult: showResult,
+};
+
+renderStart();
+
+</script>
+</body>
+</html>

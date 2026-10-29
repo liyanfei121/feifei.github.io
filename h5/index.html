@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="format-detection" content="telephone=no">
+<title>你更适合芯片制造，还是芯片测试</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html,body { height:100%; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB",
+               "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+  background:#F7FBF8; color:#04342C; overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+.screen { display:none; min-height:100%; flex-direction:column; }
+.screen.on { display:flex; }
+
+/* ---------- 开始页 ---------- */
+#screen-start { align-items:center; justify-content:center; padding:36px 24px 40px; text-align:center; }
+.start-wrap { width:100%; max-width:420px; }
+.start-badge {
+  display:inline-block; background:#D8EDE1; color:#0F6E56; font-size:13px; font-weight:700;
+  padding:6px 14px; border-radius:20px; margin-bottom:18px; letter-spacing:.5px;
+}
+.start-title { font-size:30px; font-weight:800; line-height:1.32; color:#04342C; }
+.start-sub { font-size:14px; color:#5A6B63; margin-top:12px; line-height:1.7; }
+.start-meta { display:flex; justify-content:center; gap:8px; margin:22px 0 26px; flex-wrap:wrap; }
+.meta-pill {
+  background:#fff; border:1px solid #D8EDE1; color:#0F6E56; font-size:12.5px;
+  font-weight:600; padding:6px 13px; border-radius:16px;
+}
+.start-btn {
+  width:100%; background:#0F6E56; color:#fff; border:none; border-radius:12px;
+  padding:16px; font-size:17px; font-weight:700; cursor:pointer;
+  box-shadow:0 6px 18px rgba(15,110,86,.24); transition:transform .12s, opacity .12s;
+}
+.start-btn:active { transform:scale(.985); opacity:.92; }
+.start-note { font-size:12px; color:#8A9A91; margin-top:16px; line-height:1.7; }
+.start-logo { margin-top:26px; font-size:11.5px; color:#A8B6AE; letter-spacing:.4px; }
+
+/* ---------- 答题页 ---------- */
+#screen-quiz { padding:0; }
+.quiz-top {
+  position:sticky; top:0; z-index:10; background:#F7FBF8; padding:16px 20px 12px;
+  border-bottom:1px solid #EAF3EE;
+}
+.quiz-top-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+.back-btn {
+  width:34px; height:34px; border-radius:9px; border:1px solid #D8EDE1; background:#fff;
+  color:#0F6E56; font-size:17px; align-items:center; justify-content:center; cursor:pointer;
+  display:none; font-weight:700; flex:none;
+}
+.back-btn.on { display:flex; }
+.q-counter { font-size:13px; color:#5A6B63; font-weight:600; }
+.q-counter b { color:#0F6E56; font-size:19px; font-weight:800; }
+.prog-track { height:4px; background:#E3EFE9; border-radius:3px; overflow:hidden; }
+.prog-fill { height:100%; background:#0F6E56; width:0; transition:width .3s ease; }
+
+.quiz-body { flex:1; padding:26px 20px 40px; max-width:520px; margin:0 auto; width:100%; }
+.q-text {
+  font-size:19px; font-weight:700; line-height:1.6; color:#04342C; margin-bottom:22px;
+  animation:fadeUp .3s ease;
+}
+@keyframes fadeUp { from{opacity:0;transform:translateY(8px);} to{opacity:1;transform:none;} }
+.opt {
+  display:flex; align-items:flex-start; gap:12px; width:100%; text-align:left;
+  background:#fff; border:1.5px solid #E3EFE9; border-radius:13px; padding:15px 16px;
+  margin-bottom:11px; cursor:pointer; font-size:15px; line-height:1.55; color:#2F4A41;
+  transition:border-color .15s, background .15s, transform .1s;
+  animation:fadeUp .3s ease backwards;
+}
+.opt:nth-child(1){animation-delay:.04s} .opt:nth-child(2){animation-delay:.08s}
+.opt:nth-child(3){animation-delay:.12s} .opt:nth-child(4){animation-delay:.16s}
+.opt:active { transform:scale(.99); }
+.opt.chosen { border-color:#0F6E56; background:#EFF7F2; color:#04342C; }
+.opt-key {
+  flex:none; width:25px; height:25px; border-radius:8px; background:#D8EDE1; color:#0F6E56;
+  font-size:13px; font-weight:800; display:flex; align-items:center; justify-content:center;
+  transition:background .15s, color .15s;
+}
+.opt.chosen .opt-key { background:#0F6E56; color:#fff; }
+.opt-text { padding-top:2px; }
+
+/* ---------- 结果页 ---------- */
+#screen-quiz.done { display:none; }
+.result-hero {
+  background:#04342C; color:#fff; padding:34px 22px 30px; text-align:center;
+}
+.r-tag {
+  display:inline-block; color:#fff; font-size:13px; font-weight:700; padding:6px 16px;
+  border-radius:18px; margin-bottom:12px;
+}
+.r-label { font-size:27px; font-weight:800; margin-bottom:6px; }
+.r-hero-sub { font-size:13px; color:#9FBCAF; margin-top:8px; }
+
+.result-body { padding:22px 20px 40px; max-width:520px; margin:0 auto; width:100%; }
+.card {
+  background:#fff; border:1px solid #E3EFE9; border-radius:13px; padding:17px 18px; margin-bottom:12px;
+}
+.card-label { font-size:11.5px; font-weight:700; color:#0F6E56; letter-spacing:1px; margin-bottom:9px; }
+.card-text { font-size:14.5px; line-height:1.78; color:#2F4A41; }
+.jobs-list { font-size:14.5px; line-height:1.8; color:#0F6E56; font-weight:700; }
+.warn-card { background:#FDF4EF; border-color:#F2D6C8; }
+.warn-card .card-label { color:#C4622F; }
+.warn-card .card-text { color:#8A4A26; }
+
+.score-card { background:#fff; border:1px solid #E3EFE9; border-radius:13px; padding:16px 18px; margin-bottom:12px; }
+.score-row { display:flex; align-items:center; gap:11px; margin-bottom:9px; }
+.score-row:last-child { margin-bottom:0; }
+.score-name { font-size:13px; font-weight:700; width:44px; flex:none; }
+.score-track { flex:1; height:8px; background:#EDF4F0; border-radius:4px; overflow:hidden; }
+.score-fill { height:100%; border-radius:4px; transition:width .6s ease; }
+.score-fill.m { background:#0F6E56; }
+.score-fill.t { background:#D85A30; }
+.score-num { font-size:13px; font-weight:800; width:26px; text-align:right; flex:none; }
+.score-note { font-size:11.5px; color:#8A9A91; margin-top:11px; padding-top:11px; border-top:1px dashed #E3EFE9; line-height:1.65; }
+
+.cta-card { background:#D8EDE1; border:none; border-radius:13px; padding:18px; text-align:center; margin-bottom:12px; }
+.cta-text { font-size:14.5px; font-weight:700; color:#04342C; margin-bottom:14px; }
+.qr-box {
+  width:158px; height:158px; margin:0 auto 10px; background:#fff; border-radius:11px;
+  display:flex; align-items:center; justify-content:center; overflow:hidden;
+}
+.qr-box img { width:100%; height:100%; object-fit:contain; }
+.qr-ph {
+  width:100%; height:100%; border:1.5px dashed #9FBCAF; border-radius:10px; color:#7C9A8B;
+  font-size:12px; display:flex; align-items:center; justify-content:center;
+}
+.qr-text { font-size:13px; color:#2F4A41; font-weight:600; }
+.qr-sub { font-size:11.5px; color:#5A6B63; margin-top:5px; }
+
+.btn-row { display:flex; gap:10px; margin-top:14px; }
+.btn {
+  flex:1; border-radius:11px; padding:13px; font-size:14.5px; font-weight:700; cursor:pointer;
+  border:1.5px solid #0F6E56; background:#0F6E56; color:#fff; transition:transform .1s, opacity .1s;
+}
+.btn:active { transform:scale(.985); opacity:.92; }
+.btn.ghost { background:#fff; color:#0F6E56; }
+.result-foot { text-align:center; font-size:11.5px; color:#A8B6AE; margin-top:24px; line-height:1.8; }
+
+@media (max-width:360px) {
+  .start-title { font-size:26px; }
+  .r-label { font-size:23px; }
+  .q-text { font-size:17px; }
+  .opt { font-size:14px; padding:13px 14px; }
+}
+</style>
+</head>
+<body>
+
+<!-- 开始页 -->
+<div class="screen on" id="screen-start">
+  <div class="start-wrap">
+    <div class="start-badge">2 分钟 10 题</div>
+    <h1 class="start-title">你更适合芯片制造，<br>还是芯片测试</h1>
+    <p class="start-sub">两个岗位名字常被放在一起提<br>但性格要求差得挺远</p>
+    <div class="start-meta">
+      <span class="meta-pill">10 道题</span>
+      <span class="meta-pill">做完出结果</span>
+      <span class="meta-pill">5 档结果</span>
+    </div>
+    <button class="start-btn" id="start-btn">开始测试</button>
+    <p class="start-note">选完 10 题自动出结果<br>含岗位方向、能力建议与短板提醒</p>
+    <p class="start-logo">向日葵产学研 ｜ 上海临港产业大学集成电路二院</p>
+  </div>
+</div>
+
+<!-- 答题页 -->
+<div class="screen" id="screen-quiz">
+  <div class="quiz-top">
+    <div class="quiz-top-row">
+      <button class="back-btn" id="back-btn">‹</button>
+      <div class="q-counter"><b id="q-index">01</b><span id="q-total"> / 10</span></div>
+    </div>
+    <div class="prog-track"><div class="prog-fill" id="bar"></div></div>
+  </div>
+  <div class="quiz-body">
+    <div class="q-text" id="q-text"></div>
+    <div id="options"></div>
+  </div>
+</div>
+
+<!-- 结果页 -->
+<div class="screen" id="screen-result">
+  <div class="result-hero">
+    <div class="r-tag" id="r-tag"></div>
+    <div class="r-label" id="r-label"></div>
+    <div class="r-hero-sub">这是你的测试结果</div>
+  </div>
+  <div class="result-body">
+
+    <div class="card">
+      <div class="card-label">你的画像</div>
+      <div class="card-text" id="r-lead"></div>
+    </div>
+
+    <div class="score-card">
+      <div class="score-row">
+        <span class="score-name">制造</span>
+        <div class="score-track"><div class="score-fill m" id="bar-m"></div></div>
+        <span class="score-num" id="score-m">0</span>
+      </div>
+      <div class="score-row">
+        <span class="score-name">测试</span>
+        <div class="score-track"><div class="score-fill t" id="bar-t"></div></div>
+        <span class="score-num" id="score-t">0</span>
+      </div>
+      <div class="score-note">深度分 <b id="score-d">0</b> 分，达到 4 分及以上说明你愿意往原理和根因里钻，落在进阶档。</div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">对应岗位方向</div>
+      <div class="jobs-list" id="r-jobs"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">给零基础的你</div>
+      <div class="card-text" id="r-advice"></div>
+    </div>
+
+    <div class="card warn-card">
+      <div class="card-label">一句提醒</div>
+      <div class="card-text" id="r-warn"></div>
+    </div>
+
+    <div class="cta-card">
+      <div class="cta-text" id="r-cta"></div>
+      <div class="qr-box" id="qr-box"></div>
+      <div class="qr-text" id="qr-text"></div>
+      <div class="qr-sub"></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn ghost" id="restart-btn">重新测一次</button>
+      <button class="btn" id="share-btn">分享我的结果</button>
+    </div>
+
+    <p class="result-foot">结果只是参考，不是判决<br>十道题看的是倾向，真实适配还得靠上手试一次</p>
+  </div>
+</div>
+
+<script src="quiz.js"></script>
+</body>
+</html>
